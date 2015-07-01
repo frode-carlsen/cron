@@ -174,6 +174,20 @@ public class CronExpression {
     }
 
     public DateTime nextTimeAfter(DateTime afterTime) {
+        // will search for the next time within the next 4 years. If there is no
+        // time matching, an InvalidArgumentException will be thrown (it is very
+        // likely that the cron expression is invalid, like the February 30th).
+        return nextTimeAfter(afterTime, afterTime.plusYears(4));
+    }
+
+    public DateTime nextTimeAfter(DateTime afterTime, long durationInMillis) {
+        // will search for the next time within the next durationInMillis
+        // millisecond. Be aware that the duration is specified in millis,
+        // but in fact the limit is checked on a day-to-day basis.
+        return nextTimeAfter(afterTime, afterTime.plus(durationInMillis));
+    }
+
+    public DateTime nextTimeAfter(DateTime afterTime, DateTime dateTimeBarrier) {
         MutableDateTime nextTime = new MutableDateTime(afterTime);
         nextTime.setMillisOfSecond(0);
         nextTime.secondOfDay().add(1);
@@ -207,6 +221,7 @@ public class CronExpression {
                     }
                     nextTime.addDays(1);
                     nextTime.setTime(0, 0, 0, 0);
+                    checkIfDateTimeBarrierIsReached(nextTime, dateTimeBarrier);
                 }
                 if (monthField.matches(nextTime.getMonthOfYear())) {
                     break;
@@ -214,15 +229,23 @@ public class CronExpression {
                 nextTime.addMonths(1);
                 nextTime.setDayOfMonth(1);
                 nextTime.setTime(0, 0, 0, 0);
+                checkIfDateTimeBarrierIsReached(nextTime, dateTimeBarrier);
             }
             if (dayOfWeekField.matches(new LocalDate(nextTime))) {
                 break;
             }
             nextTime.addDays(1);
             nextTime.setTime(0, 0, 0, 0);
+            checkIfDateTimeBarrierIsReached(nextTime, dateTimeBarrier);
         }
 
         return nextTime.toDateTime();
+    }
+
+    private static void checkIfDateTimeBarrierIsReached(MutableDateTime nextTime, DateTime dateTimeBarrier) {
+        if (nextTime.isAfter(dateTimeBarrier)) {
+            throw new IllegalArgumentException("No next execution time could be determined that is before the limit of " + dateTimeBarrier);
+        }
     }
 
     @Override

@@ -442,4 +442,28 @@ public class CronExpressionTest {
     public void shall_not_not_support_rolling_period() throws Exception {
         new CronExpression("* * 5-1 * * *");
     }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void non_existing_date_throws_exception() throws Exception {
+        // Will check for the next 4 years - no 30th of February is found so a IAE is thrown.
+        new CronExpression("* * * 30 2 *").nextTimeAfter(DateTime.now());
+    }
+
+    @Test
+    public void test_default_barrier() throws Exception {
+        // the default barrier is 4 years - so leap years are considered.
+        assertThat(new CronExpression("* * * 29 2 *").nextTimeAfter(new DateTime(2012, 3, 1, 00, 00))).isEqualTo(new DateTime(2016, 2, 29, 00, 00));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void test_one_year_barrier() throws Exception {
+        // The next leap year is 2016, so an IllegalArgumentException is expected.
+        new CronExpression("* * * 29 2 *").nextTimeAfter(new DateTime(2012, 3, 1, 00, 00), new DateTime(2013, 3, 1, 00, 00));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void test_two_year_barrier() throws Exception {
+        // The next leap year is 2016, so an IllegalArgumentException is expected.
+        new CronExpression("* * * 29 2 *").nextTimeAfter(new DateTime(2012, 3, 1, 00, 00), 1000 * 60 * 60 * 24 * 356 * 2);
+    }
 }
