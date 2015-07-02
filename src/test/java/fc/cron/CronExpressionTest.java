@@ -466,4 +466,14 @@ public class CronExpressionTest {
         // The next leap year is 2016, so an IllegalArgumentException is expected.
         new CronExpression("* * * 29 2 *").nextTimeAfter(new DateTime(2012, 3, 1, 00, 00), 1000 * 60 * 60 * 24 * 356 * 2);
     }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void test_seconds_specified_but_should_be_omitted() throws Exception {
+        CronExpression.createWithoutSeconds("* * * 29 2 *");
+    }
+
+    @Test
+    public void test_without_seconds() throws Exception {
+        assertThat(CronExpression.createWithoutSeconds("* * 29 2 *").nextTimeAfter(new DateTime(2012, 3, 1, 00, 00))).isEqualTo(new DateTime(2016, 2, 29, 00, 00));
+    }
 }

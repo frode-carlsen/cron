@@ -32,7 +32,7 @@ import org.joda.time.MutableDateTime;
  * Parser for unix-like cron expressions: Cron expressions allow specifying combinations of criteria for time
  * such as: &quot;Each Monday-Friday at 08:00&quot; or &quot;Every last friday of the month at 01:30&quot;
  * <p>
- * A cron expressions consists of 6 mandatory fields separated by space. <br>
+ * A cron expressions consists of 5 or 6 mandatory fields (seconds may be omitted) separated by space. <br>
  * These are:
  * 
  * <table cellspacing="8">
@@ -44,7 +44,7 @@ import org.joda.time.MutableDateTime;
  * <th align="left">Special Characters</th>
  * </tr>
  * <tr>
- * <td align="left"><code>Seconds</code></td>
+ * <td align="left"><code>Seconds (may be omitted)</code></td>
  * <td align="left">&nbsp;</th>
  * <td align="left"><code>0-59</code></td>
  * <td align="left">&nbsp;</th>
@@ -143,7 +143,6 @@ public class CronExpression {
             this.to = to;
             this.names = names;
         }
-
     }
 
     private final String expr;
@@ -154,23 +153,39 @@ public class CronExpression {
     private final SimpleField monthField;
     private final DayOfMonthField dayOfMonthField;
 
-    public CronExpression(String expr) {
+    public CronExpression(final String expr) {
+        this(expr, true);
+    }
+
+    public CronExpression(final String expr, final boolean withSeconds) {
         if (expr == null) {
-            throw new IllegalArgumentException("expr is null");
-        }
-        this.expr = expr;
-        String[] parts = expr.split("\\s+");
-        if (parts.length != 6) {
-            throw new IllegalArgumentException(String.format("Invalid cronexpression [%s], expected %s felt, got %s"
-                    , expr, CronFieldType.values().length, parts.length));
+            throw new IllegalArgumentException("expr is null"); //$NON-NLS-1$
         }
 
-        this.secondField = new SimpleField(CronFieldType.SECOND, parts[0]);
-        this.minuteField = new SimpleField(CronFieldType.MINUTE, parts[1]);
-        this.hourField = new SimpleField(CronFieldType.HOUR, parts[2]);
-        this.dayOfMonthField = new DayOfMonthField(parts[3]);
-        this.monthField = new SimpleField(CronFieldType.MONTH, parts[4]);
-        this.dayOfWeekField = new DayOfWeekField(parts[5]);
+        this.expr = expr;
+
+        final int expectedParts = withSeconds ? 6 : 5;
+        final String[] parts = expr.split("\\s+"); //$NON-NLS-1$
+        if (parts.length != expectedParts) {
+            throw new IllegalArgumentException(String.format("Invalid cron expression [%s], expected %s felt, got %s"
+                    , expr, expectedParts, parts.length));
+        }
+
+        int ix = withSeconds ? 1 : 0;
+        this.secondField = new SimpleField(CronFieldType.SECOND, withSeconds ? parts[0] : "*");
+        this.minuteField = new SimpleField(CronFieldType.MINUTE, parts[ix++]);
+        this.hourField = new SimpleField(CronFieldType.HOUR, parts[ix++]);
+        this.dayOfMonthField = new DayOfMonthField(parts[ix++]);
+        this.monthField = new SimpleField(CronFieldType.MONTH, parts[ix++]);
+        this.dayOfWeekField = new DayOfWeekField(parts[ix++]);
+    }
+
+    public static CronExpression create(final String expr) {
+        return new CronExpression(expr, true);
+    }
+
+    public static CronExpression createWithoutSeconds(final String expr) {
+        return new CronExpression(expr, false);
     }
 
     public DateTime nextTimeAfter(DateTime afterTime) {
@@ -465,6 +480,5 @@ public class CronExpression {
         protected boolean matches(int val, FieldPart part) {
             return "?".equals(part.modifier) || super.matches(val, part);
         }
-
     }
 }

@@ -4,7 +4,7 @@
   <groupId>fc.cron</groupId>
   <artifactId>cron</artifactId>
   <packaging>jar</packaging>
-  <version>1.1</version>
+  <version>1.2</version>
   <name>cron</name>
   <url>https://github.com/frode-carlsen/cron</url>
   
