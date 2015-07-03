@@ -172,7 +172,7 @@ public class CronExpression {
         }
 
         int ix = withSeconds ? 1 : 0;
-        this.secondField = new SimpleField(CronFieldType.SECOND, withSeconds ? parts[0] : "*");
+        this.secondField = new SimpleField(CronFieldType.SECOND, withSeconds ? parts[0] : "0");
         this.minuteField = new SimpleField(CronFieldType.MINUTE, parts[ix++]);
         this.hourField = new SimpleField(CronFieldType.HOUR, parts[ix++]);
         this.dayOfMonthField = new DayOfMonthField(parts[ix++]);
