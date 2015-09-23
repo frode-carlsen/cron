@@ -25,6 +25,7 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Hours;
 import org.joda.time.LocalDate;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -34,10 +35,17 @@ import fc.cron.CronExpression.DayOfWeekField;
 import fc.cron.CronExpression.SimpleField;
 
 public class CronExpressionTest {
+    DateTimeZone original;
+
     @Before
     public void setUp() {
-        DateTimeZone myZone = DateTimeZone.forID("Europe/Oslo");
-        DateTimeZone.setDefault(myZone);
+        original = DateTimeZone.getDefault();
+        DateTimeZone.setDefault(DateTimeZone.forID("Europe/Oslo"));
+    }
+
+    @After
+    public void tearDown() {
+        DateTimeZone.setDefault(original);
     }
 
     @Test
