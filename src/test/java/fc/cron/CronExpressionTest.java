@@ -21,18 +21,24 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import fc.cron.CronExpression;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.Hours;
+import org.joda.time.LocalDate;
+import org.junit.Before;
+import org.junit.Test;
+
 import fc.cron.CronExpression.CronFieldType;
 import fc.cron.CronExpression.DayOfMonthField;
 import fc.cron.CronExpression.DayOfWeekField;
 import fc.cron.CronExpression.SimpleField;
 
-import org.joda.time.DateTime;
-import org.joda.time.Hours;
-import org.joda.time.LocalDate;
-import org.junit.Test;
-
 public class CronExpressionTest {
+    @Before
+    public void setUp() {
+        DateTimeZone myZone = DateTimeZone.forID("Europe/Oslo");
+        DateTimeZone.setDefault(myZone);
+    }
 
     @Test
     public void shall_parse_number() throws Exception {
@@ -233,7 +239,7 @@ public class CronExpressionTest {
         assertThat(new CronExpression("0 * 7,19 * * *").nextTimeAfter(new DateTime(2012, 4, 10, 19, 00))).isEqualTo(new DateTime(2012, 4, 10, 19, 01));
         assertThat(new CronExpression("0 * 7,19 * * *").nextTimeAfter(new DateTime(2012, 4, 10, 19, 59))).isEqualTo(new DateTime(2012, 4, 11, 07, 00));
     }
-    
+
     @Test
     public void check_hour_shall_run_25_times_in_DST_change_to_wintertime() throws Exception {
         CronExpression cron = new CronExpression("0 1 * * * *");
@@ -252,7 +258,7 @@ public class CronExpressionTest {
         }
         assertThat(count).isEqualTo(25);
     }
-    
+
     @Test
     public void check_hour_shall_run_23_times_in_DST_change_to_summertime() throws Exception {
         CronExpression cron = new CronExpression("0 0 * * * *");
