@@ -276,14 +276,14 @@ public class CronExpression {
     abstract static class BasicField {
         private static final Pattern CRON_FELT_REGEXP = Pattern
                 .compile("(?:                                             # start of group 1\n"
-                        + "   (?:(?<all>\\*)|(?<ignorer>\\?)|(?<last>L))  # globalt flag (L, ?, *)\n"
-                        + " | (?<start>[0-9]{1,2}|[a-z]{3,3})              # or start number or symbol\n"
+                        + "   (?:(\\*)|(\\?)|(L))  # globalt flag (L, ?, *)\n"
+                        + " | ([0-9]{1,2}|[a-z]{3,3})              # or start number or symbol\n"
                         + "      (?:                                        # start of group 2\n"
-                        + "         (?<mod>L|W)                             # modifier (L,W)\n"
-                        + "       | -(?<end>[0-9]{1,2}|[a-z]{3,3})        # or end nummer or symbol (in range)\n"
+                        + "         (L|W)                             # modifier (L,W)\n"
+                        + "       | -([0-9]{1,2}|[a-z]{3,3})        # or end nummer or symbol (in range)\n"
                         + "      )?                                         # end of group 2\n"
                         + ")                                              # end of group 1\n"
-                        + "(?:(?<inkmod>/|\\#)(?<ink>[0-9]{1,7}))?        # increment and increment modifier (/ or \\#)\n"
+                        + "(?:(/|\\#)([0-9]{1,7}))?        # increment and increment modifier (/ or \\#)\n"
                         , Pattern.CASE_INSENSITIVE | Pattern.COMMENTS);
 
         final CronFieldType fieldType;
@@ -301,11 +301,11 @@ public class CronExpression {
                 if (!m.matches()) {
                     throw new IllegalArgumentException("Invalid cron field '" + rangePart + "' for field [" + fieldType + "]");
                 }
-                String startNummer = m.group("start");
-                String modifier = m.group("mod");
-                String sluttNummer = m.group("end");
-                String inkrementModifier = m.group("inkmod");
-                String inkrement = m.group("ink");
+                String startNummer = m.group(4);
+                String modifier = m.group(5);
+                String sluttNummer = m.group(6);
+                String inkrementModifier = m.group(7);
+                String inkrement = m.group(8);
 
                 FieldPart part = new FieldPart();
                 part.increment = 999;
@@ -320,14 +320,14 @@ public class CronExpression {
                     } else {
                         part.to = part.from;
                     }
-                } else if (m.group("all") != null) {
+                } else if (m.group(1) != null) {
                     part.from = fieldType.from;
                     part.to = fieldType.to;
                     part.increment = 1;
-                } else if (m.group("ignorer") != null) {
-                    part.modifier = m.group("ignorer");
-                } else if (m.group("last") != null) {
-                    part.modifier = m.group("last");
+                } else if (m.group(2) != null) {
+                    part.modifier = m.group(2);
+                } else if (m.group(3) != null) {
+                    part.modifier = m.group(3);
                 } else {
                     throw new IllegalArgumentException("Invalid cron part: " + rangePart);
                 }
