@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Frode Carlsen
+ * Copyright (C) 2012- Frode Carlsen
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 package fc.cron;
 
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Arrays;
 import java.util.HashSet;

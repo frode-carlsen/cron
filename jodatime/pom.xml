@@ -16,11 +16,17 @@
   <name>cron-jodatime</name>
 
   <dependencies>
-     <dependency>
+    <dependency>
       <groupId>joda-time</groupId>
       <artifactId>joda-time</artifactId>
       <version>2.9.7</version>
-     </dependency>
+    </dependency>
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <version>3.6.2</version>
+      <scope>test</scope>
+    </dependency>
   
   </dependencies>
   

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Frode Carlsen
+ * Copyright (C) 2012- Frode Carlsen
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,10 @@
  */
 package fc.cron;
 
-import fc.cron.CronExpression.CronFieldType;
-import fc.cron.CronExpression.DayOfMonthField;
-import fc.cron.CronExpression.DayOfWeekField;
-import fc.cron.CronExpression.SimpleField;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.ZoneId;
@@ -27,10 +27,15 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TimeZone;
+
 import org.junit.After;
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
+
+import fc.cron.CronExpression.CronFieldType;
+import fc.cron.CronExpression.DayOfMonthField;
+import fc.cron.CronExpression.DayOfWeekField;
+import fc.cron.CronExpression.SimpleField;
 
 public class CronExpressionTest {
     TimeZone original;

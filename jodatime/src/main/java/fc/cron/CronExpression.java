@@ -29,12 +29,15 @@ import org.joda.time.LocalDate;
 import org.joda.time.MutableDateTime;
 
 /**
+ * This provides cron support for java6 upwards and jodatime.
+ * <P>
+ * 
  * Parser for unix-like cron expressions: Cron expressions allow specifying combinations of criteria for time
  * such as: &quot;Each Monday-Friday at 08:00&quot; or &quot;Every last friday of the month at 01:30&quot;
  * <p>
  * A cron expressions consists of 5 or 6 mandatory fields (seconds may be omitted) separated by space. <br>
  * These are:
- * 
+ *
  * <table cellspacing="8">
  * <tr>
  * <th align="left">Field</th>
@@ -86,11 +89,11 @@ import org.joda.time.MutableDateTime;
  * <td align="left"><code>, - * ? / L #</code></td>
  * </tr>
  * </table>
- * 
+ *
  * <P>
  * '*' Can be used in all fields and means 'for all values'. E.g. &quot;*&quot; in minutes, means 'for all minutes'
  * <P>
- * '?' Ca be used in Day-of-month and Day-of-week fields. Used to signify 'no special value'. It is used when one want
+ * '?' Can be used in Day-of-month and Day-of-week fields. Used to signify 'no special value'. It is used when one want
  * to specify something for one of those two fields, but not the other.
  * <P>
  * '-' Used to specify a time interval. E.g. &quot;10-12&quot; in Hours field means 'for hours 10, 11 and 12'
@@ -118,12 +121,12 @@ import org.joda.time.MutableDateTime;
  * - the third). If the day does not exist (e.g. &quot;5#5&quot; - 5th friday of month) and there aren't 5 fridays in
  * the month, then it won't match until the next month with 5 fridays.
  * <P>
- * <b>Case-sensitivt</b> No fields are case-sensitive
+ * <b>Case-sensitive</b> No fields are case-sensitive
  * <P>
  * <b>Dependencies between fields</b> Fields are always evaluated independently, but the expression doesn't match until
- * the constraints of each field are met.Feltene evalueres Overlap of intervals are not allowed. That is: for
+ * the constraints of each field are met. Overlap of intervals are not allowed. That is: for
  * Day-of-week field &quot;FRI-MON&quot; is invalid,but &quot;FRI-SUN,MON&quot; is valid
- * 
+ *
  */
 public class CronExpression {
 
@@ -274,13 +277,13 @@ public class CronExpression {
     }
 
     abstract static class BasicField {
-        private static final Pattern CRON_FELT_REGEXP = Pattern
+        private static final Pattern CRON_FIELD_REGEXP = Pattern
                 .compile("(?:                                             # start of group 1\n"
-                        + "   (?:(\\*)|(\\?)|(L))  # globalt flag (L, ?, *)\n"
+                        + "   (?:(\\*)|(\\?)|(L))  # global flag (L, ?, *)\n"
                         + " | ([0-9]{1,2}|[a-z]{3,3})              # or start number or symbol\n"
                         + "      (?:                                        # start of group 2\n"
                         + "         (L|W)                             # modifier (L,W)\n"
-                        + "       | -([0-9]{1,2}|[a-z]{3,3})        # or end nummer or symbol (in range)\n"
+                        + "       | -([0-9]{1,2}|[a-z]{3,3})        # or end number or symbol (in range)\n"
                         + "      )?                                         # end of group 2\n"
                         + ")                                              # end of group 1\n"
                         + "(?:(/|\\#)([0-9]{1,7}))?        # increment and increment modifier (/ or \\#)\n"
@@ -297,25 +300,25 @@ public class CronExpression {
         private void parse(String fieldExpr) { // NOSONAR
             String[] rangeParts = fieldExpr.split(",");
             for (String rangePart : rangeParts) {
-                Matcher m = CRON_FELT_REGEXP.matcher(rangePart);
+                Matcher m = CRON_FIELD_REGEXP.matcher(rangePart);
                 if (!m.matches()) {
                     throw new IllegalArgumentException("Invalid cron field '" + rangePart + "' for field [" + fieldType + "]");
                 }
-                String startNummer = m.group(4);
+                String startNumber = m.group(4);
                 String modifier = m.group(5);
-                String sluttNummer = m.group(6);
-                String inkrementModifier = m.group(7);
-                String inkrement = m.group(8);
+                String endNumber = m.group(6);
+                String incrementModifier = m.group(7);
+                String increment = m.group(8);
 
                 FieldPart part = new FieldPart();
                 part.increment = 999;
-                if (startNummer != null) {
-                    part.from = mapValue(startNummer);
+                if (startNumber != null) {
+                    part.from = mapValue(startNumber);
                     part.modifier = modifier;
-                    if (sluttNummer != null) {
-                        part.to = mapValue(sluttNummer);
+                    if (endNumber != null) {
+                        part.to = mapValue(endNumber);
                         part.increment = 1;
-                    } else if (inkrement != null) {
+                    } else if (increment != null) {
                         part.to = fieldType.to;
                     } else {
                         part.to = part.from;
@@ -332,9 +335,9 @@ public class CronExpression {
                     throw new IllegalArgumentException("Invalid cron part: " + rangePart);
                 }
 
-                if (inkrement != null) {
-                    part.incrementModifier = inkrementModifier;
-                    part.increment = Integer.valueOf(inkrement);
+                if (increment != null) {
+                    part.incrementModifier = incrementModifier;
+                    part.increment = Integer.valueOf(increment);
                 }
 
                 validateRange(part);
