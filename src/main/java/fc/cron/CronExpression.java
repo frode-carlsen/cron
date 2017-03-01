@@ -1,3 +1,4 @@
+package fc.cron;
 /*
  * Copyright (C) 2012 Frode Carlsen.
  *
@@ -12,11 +13,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * Note: rewritten to standard Java 8 DateTime by zemiak (c) 2016
  */
-package fc.cron;
-
-import static org.joda.time.DateTimeConstants.DAYS_PER_WEEK;
-
+import java.time.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -24,17 +24,13 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
-import org.joda.time.MutableDateTime;
-
 /**
  * Parser for unix-like cron expressions: Cron expressions allow specifying combinations of criteria for time
  * such as: &quot;Each Monday-Friday at 08:00&quot; or &quot;Every last friday of the month at 01:30&quot;
  * <p>
  * A cron expressions consists of 5 or 6 mandatory fields (seconds may be omitted) separated by space. <br>
  * These are:
- * 
+ *
  * <table cellspacing="8">
  * <tr>
  * <th align="left">Field</th>
@@ -86,7 +82,7 @@ import org.joda.time.MutableDateTime;
  * <td align="left"><code>, - * ? / L #</code></td>
  * </tr>
  * </table>
- * 
+ *
  * <P>
  * '*' Can be used in all fields and means 'for all values'. E.g. &quot;*&quot; in minutes, means 'for all minutes'
  * <P>
@@ -123,7 +119,7 @@ import org.joda.time.MutableDateTime;
  * <b>Dependencies between fields</b> Fields are always evaluated independently, but the expression doesn't match until
  * the constraints of each field are met.Feltene evalueres Overlap of intervals are not allowed. That is: for
  * Day-of-week field &quot;FRI-MON&quot; is invalid,but &quot;FRI-SUN,MON&quot; is valid
- * 
+ *
  */
 public class CronExpression {
 
@@ -188,24 +184,22 @@ public class CronExpression {
         return new CronExpression(expr, false);
     }
 
-    public DateTime nextTimeAfter(DateTime afterTime) {
+    public ZonedDateTime nextTimeAfter(ZonedDateTime afterTime) {
         // will search for the next time within the next 4 years. If there is no
         // time matching, an InvalidArgumentException will be thrown (it is very
         // likely that the cron expression is invalid, like the February 30th).
         return nextTimeAfter(afterTime, afterTime.plusYears(4));
     }
 
-    public DateTime nextTimeAfter(DateTime afterTime, long durationInMillis) {
+    public ZonedDateTime nextTimeAfter(ZonedDateTime afterTime, long durationInMillis) {
         // will search for the next time within the next durationInMillis
         // millisecond. Be aware that the duration is specified in millis,
         // but in fact the limit is checked on a day-to-day basis.
-        return nextTimeAfter(afterTime, afterTime.plus(durationInMillis));
+        return nextTimeAfter(afterTime, afterTime.plus(Duration.ofMillis(durationInMillis)));
     }
 
-    public DateTime nextTimeAfter(DateTime afterTime, DateTime dateTimeBarrier) {
-        MutableDateTime nextTime = new MutableDateTime(afterTime);
-        nextTime.setMillisOfSecond(0);
-        nextTime.secondOfDay().add(1);
+    public ZonedDateTime nextTimeAfter(ZonedDateTime afterTime, ZonedDateTime dateTimeBarrier) {
+        ZonedDateTime nextTime = ZonedDateTime.from(afterTime).withNano(0).plusSeconds(1).withNano(0);;
 
         while (true) { // day of week
             while (true) { // month
@@ -213,51 +207,44 @@ public class CronExpression {
                     while (true) { // hour
                         while (true) { // minute
                             while (true) { // second
-                                if (secondField.matches(nextTime.getSecondOfMinute())) {
+                                if (secondField.matches(nextTime.getSecond())) {
                                     break;
                                 }
-                                nextTime.secondOfDay().add(1);
+                                nextTime = nextTime.plusSeconds(1).withNano(0);
                             }
-                            if (minuteField.matches(nextTime.getMinuteOfHour())) {
+                            if (minuteField.matches(nextTime.getMinute())) {
                                 break;
                             }
-                            nextTime.minuteOfDay().add(1);
-                            nextTime.secondOfMinute().set(0);
+                            nextTime = nextTime.plusMinutes(1).withSecond(0).withNano(0);
                         }
-                        if (hourField.matches(nextTime.getHourOfDay())) {
+                        if (hourField.matches(nextTime.getHour())) {
                             break;
                         }
-                        nextTime.hourOfDay().add(1);
-                        nextTime.minuteOfHour().set(0);
-                        nextTime.secondOfMinute().set(0);
+                        nextTime = nextTime.plusHours(1).withMinute(0).withSecond(0).withNano(0);
                     }
-                    if (dayOfMonthField.matches(new LocalDate(nextTime))) {
+                    if (dayOfMonthField.matches(nextTime.toLocalDate())) {
                         break;
                     }
-                    nextTime.addDays(1);
-                    nextTime.setTime(0, 0, 0, 0);
+                    nextTime = nextTime.plusDays(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
                     checkIfDateTimeBarrierIsReached(nextTime, dateTimeBarrier);
                 }
-                if (monthField.matches(nextTime.getMonthOfYear())) {
+                if (monthField.matches(nextTime.getMonth().getValue())) {
                     break;
                 }
-                nextTime.addMonths(1);
-                nextTime.setDayOfMonth(1);
-                nextTime.setTime(0, 0, 0, 0);
+                nextTime = nextTime.plusMonths(1).withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
                 checkIfDateTimeBarrierIsReached(nextTime, dateTimeBarrier);
             }
-            if (dayOfWeekField.matches(new LocalDate(nextTime))) {
+            if (dayOfWeekField.matches(nextTime.toLocalDate())) {
                 break;
             }
-            nextTime.addDays(1);
-            nextTime.setTime(0, 0, 0, 0);
+            nextTime = nextTime.plusDays(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
             checkIfDateTimeBarrierIsReached(nextTime, dateTimeBarrier);
         }
 
-        return nextTime.toDateTime();
+        return nextTime;
     }
 
-    private static void checkIfDateTimeBarrierIsReached(MutableDateTime nextTime, DateTime dateTimeBarrier) {
+    private static void checkIfDateTimeBarrierIsReached(ZonedDateTime nextTime, ZonedDateTime dateTimeBarrier) {
         if (nextTime.isAfter(dateTimeBarrier)) {
             throw new IllegalArgumentException("No next execution time could be determined that is before the limit of " + dateTimeBarrier);
         }
@@ -406,14 +393,15 @@ public class CronExpression {
         boolean matches(LocalDate dato) {
             for (FieldPart part : parts) {
                 if ("L".equals(part.modifier)) {
-                    return dato.getDayOfWeek() == part.from && dato.getDayOfMonth() > (dato.dayOfMonth().getMaximumValue() - DAYS_PER_WEEK);
+                    YearMonth ym = YearMonth.of(dato.getYear(), dato.getMonth().getValue());
+                    return dato.getDayOfWeek() == DayOfWeek.of(part.from) && dato.getDayOfMonth() > (ym.lengthOfMonth() - 7);
                 } else if ("#".equals(part.incrementModifier)) {
-                    if (dato.getDayOfWeek() == part.from) {
+                    if (dato.getDayOfWeek() == DayOfWeek.of(part.from)) {
                         int num = dato.getDayOfMonth() / 7;
                         return part.increment == (dato.getDayOfMonth() % 7 == 0 ? num : num + 1);
                     }
                     return false;
-                } else if (matches(dato.getDayOfWeek(), part)) {
+                } else if (matches(dato.getDayOfWeek().getValue(), part)) {
                     return true;
                 }
             }
@@ -449,14 +437,15 @@ public class CronExpression {
         boolean matches(LocalDate dato) {
             for (FieldPart part : parts) {
                 if ("L".equals(part.modifier)) {
-                    return dato.getDayOfMonth() == (dato.dayOfMonth().getMaximumValue() - (part.from == null ? 0 : part.from));
+                    YearMonth ym = YearMonth.of(dato.getYear(), dato.getMonth().getValue());
+                    return dato.getDayOfMonth() == (ym.lengthOfMonth() - (part.from == null ? 0 : part.from));
                 } else if ("W".equals(part.modifier)) {
-                    if (dato.getDayOfWeek() <= 5) {
+                    if (dato.getDayOfWeek().getValue() <= 5) {
                         if (dato.getDayOfMonth() == part.from) {
                             return true;
-                        } else if (dato.getDayOfWeek() == 5) {
+                        } else if (dato.getDayOfWeek().getValue() == 5) {
                             return dato.plusDays(1).getDayOfMonth() == part.from;
-                        } else if (dato.getDayOfWeek() == 1) {
+                        } else if (dato.getDayOfWeek().getValue() == 1) {
                             return dato.minusDays(1).getDayOfMonth() == part.from;
                         }
                     }
