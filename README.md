@@ -17,7 +17,7 @@ See javadoc
  
 ## version 1.4:
  * 2017-02-13: added support for java6 (supports android 4) by @adelnizamutdinov
- * 2016-09-11: rewritten to Java 8 DateTime by zemiak
+ * 2016-09-11: rewritten to Java 8 DateTime by @zemiak
 
 ## version 1.3:
  * 2015-09-23: added timezone to tests by @alf
