@@ -9,6 +9,17 @@
 	<name>cron</name>
 	<url>https://github.com/frode-carlsen/cron</url>
 
+	<issueManagement>
+		<url>https://github.com/frode-carlsen/cron/issues</url>
+		<system>GitHub Issues</system>
+	</issueManagement>
+
+	<scm>
+		<url>https://github.com/frode-carlsen/cron</url>
+		<connection>scm:git:git://github.com/frode-carlsen/cron.git</connection>
+		<developerConnection>scm:git:git@github.com:frode-carlsen/cron.git</developerConnection>
+	</scm>
+	
 	<licenses>
 		<license>
 			<name>Apache License Version 2.0</name>
