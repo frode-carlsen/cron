@@ -5,7 +5,7 @@
 	<groupId>fc.cron</groupId>
 	<artifactId>cron</artifactId>
 	<packaging>pom</packaging>
-	<version>1.4</version>
+	<version>1.4-SNAPSHOT</version>
 	<name>cron</name>
 	<url>https://github.com/frode-carlsen/cron</url>
 	
