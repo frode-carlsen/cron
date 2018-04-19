@@ -1,3 +1,6 @@
+
+[![Known Vulnerabilities](https://snyk.io/test/github/frode-carlsen/cron/badge.svg?targetFile=pom.xml)](https://snyk.io/test/github/frode-carlsen/cron?targetFile=pom.xml)
+
 # cron
 
  Cron expression parser and evaluator.  
