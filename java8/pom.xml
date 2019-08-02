@@ -4,12 +4,10 @@
   <parent>
     <groupId>fc.cron</groupId>
     <artifactId>cron</artifactId>
-    <version>1.4</version>
+    <version>1.5</version>
   </parent>
-  <groupId>fc.cron</groupId>
   <artifactId>cron-java8</artifactId>
   <packaging>jar</packaging>
-  <version>1.4</version>
   <name>cron-java8</name>
 
   <build>
