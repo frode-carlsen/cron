@@ -17,7 +17,11 @@ package fc.cron;
  *
  * Note: rewritten to standard Java 8 DateTime by zemiak (c) 2016
  */
-import java.time.*;
+import java.time.DayOfWeek;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -129,9 +133,103 @@ import java.util.regex.Pattern;
 public class CronExpression {
 
     enum CronFieldType {
-        SECOND(0, 59, null), MINUTE(0, 59, null), HOUR(0, 23, null), DAY_OF_MONTH(1, 31, null), MONTH(1, 12,
-                Arrays.asList("JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC")), DAY_OF_WEEK(1, 7,
-                        Arrays.asList("MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"));
+        SECOND(0, 59, null) {
+            @Override
+            int getValue(ZonedDateTime dateTime) {
+                return dateTime.getSecond();
+            }
+
+            @Override
+            ZonedDateTime setValue(ZonedDateTime dateTime, int value) {
+                return dateTime.withSecond(value).withNano(0);
+            }
+
+            @Override
+            ZonedDateTime overflow(ZonedDateTime dateTime) {
+                return dateTime.plusMinutes(1).withSecond(0).withNano(0);
+            }
+        },
+        MINUTE(0, 59, null) {
+            @Override
+            int getValue(ZonedDateTime dateTime) {
+                return dateTime.getMinute();
+            }
+
+            @Override
+            ZonedDateTime setValue(ZonedDateTime dateTime, int value) {
+                return dateTime.withMinute(value).withSecond(0).withNano(0);
+            }
+
+            @Override
+            ZonedDateTime overflow(ZonedDateTime dateTime) {
+                return dateTime.plusHours(1).withMinute(0).withSecond(0).withNano(0);
+            }
+        },
+        HOUR(0, 23, null) {
+            @Override
+            int getValue(ZonedDateTime dateTime) {
+                return dateTime.getHour();
+            }
+
+            @Override
+            ZonedDateTime setValue(ZonedDateTime dateTime, int value) {
+                return dateTime.withHour(value).withMinute(0).withSecond(0).withNano(0);
+            }
+
+            @Override
+            ZonedDateTime overflow(ZonedDateTime dateTime) {
+                return dateTime.plusDays(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+            }
+        },
+        DAY_OF_MONTH(1, 31, null) {
+            @Override
+            int getValue(ZonedDateTime dateTime) {
+                return dateTime.getDayOfMonth();
+            }
+
+            @Override
+            ZonedDateTime setValue(ZonedDateTime dateTime, int value) {
+                return dateTime.withDayOfMonth(value).withMinute(0).withSecond(0).withNano(0);
+            }
+
+            @Override
+            ZonedDateTime overflow(ZonedDateTime dateTime) {
+                return dateTime.plusMonths(1).withDayOfMonth(0).withMinute(0).withSecond(0).withNano(0);
+            }
+        },
+        MONTH(1, 12,
+                Arrays.asList("JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC")) {
+            @Override
+            int getValue(ZonedDateTime dateTime) {
+                return dateTime.getMonthValue();
+            }
+
+            @Override
+            ZonedDateTime setValue(ZonedDateTime dateTime, int value) {
+                return dateTime.withMonth(value).withDayOfMonth(1).withMinute(0).withSecond(0).withNano(0);
+            }
+
+            @Override
+            ZonedDateTime overflow(ZonedDateTime dateTime) {
+                return dateTime.plusYears(1).withMonth(1).withDayOfMonth(1).withMinute(0).withSecond(0).withNano(0);
+            }
+        },
+        DAY_OF_WEEK(1, 7, Arrays.asList("MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN")) {
+            @Override
+            int getValue(ZonedDateTime dateTime) {
+                return dateTime.getDayOfWeek().getValue();
+            }
+
+            @Override
+            ZonedDateTime setValue(ZonedDateTime dateTime, int value) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            ZonedDateTime overflow(ZonedDateTime dateTime) {
+                throw new UnsupportedOperationException();
+            }
+        };
 
         final int from, to;
         final List<String> names;
@@ -141,6 +239,27 @@ public class CronExpression {
             this.to = to;
             this.names = names;
         }
+
+        /**
+         * @param dateTime {@link ZonedDateTime} instance
+         * @return The field time or date value from {@code dateTime}
+         */
+        abstract int getValue(ZonedDateTime dateTime);
+
+        /**
+         * @param dateTime Initial {@link ZonedDateTime} instance to use
+         * @param value    to set for this field in {@code dateTime}
+         * @return {@link ZonedDateTime} with {@code value} set for this field and all smaller fields cleared
+         */
+        abstract ZonedDateTime setValue(ZonedDateTime dateTime, int value);
+
+        /**
+         * Handle when this field overflows and the next higher field should be incremented
+         *
+         * @param dateTime Initial {@link ZonedDateTime} instance to use
+         * @return {@link ZonedDateTime} with the next greater field incremented and all smaller fields cleared
+         */
+        abstract ZonedDateTime overflow(ZonedDateTime dateTime);
     }
 
     private final String expr;
@@ -200,50 +319,53 @@ public class CronExpression {
     }
 
     public ZonedDateTime nextTimeAfter(ZonedDateTime afterTime, ZonedDateTime dateTimeBarrier) {
-        ZonedDateTime nextTime = ZonedDateTime.from(afterTime).withNano(0).plusSeconds(1).withNano(0);
-        ;
+        ZonedDateTime[] nextDateTime = { afterTime.plusSeconds(1).withNano(0) };
 
-        while (true) { // day of week
-            while (true) { // month
-                while (true) { // day of month
-                    while (true) { // hour
-                        while (true) { // minute
-                            while (true) { // second
-                                if (secondField.matches(nextTime.getSecond())) {
-                                    break;
-                                }
-                                nextTime = nextTime.plusSeconds(1).withNano(0);
-                            }
-                            if (minuteField.matches(nextTime.getMinute())) {
-                                break;
-                            }
-                            nextTime = nextTime.plusMinutes(1).withSecond(0).withNano(0);
-                        }
-                        if (hourField.matches(nextTime.getHour())) {
-                            break;
-                        }
-                        nextTime = nextTime.plusHours(1).withMinute(0).withSecond(0).withNano(0);
-                    }
-                    if (dayOfMonthField.matches(nextTime.toLocalDate())) {
-                        break;
-                    }
-                    nextTime = nextTime.plusDays(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
-                    checkIfDateTimeBarrierIsReached(nextTime, dateTimeBarrier);
-                }
-                if (monthField.matches(nextTime.getMonth().getValue())) {
-                    break;
-                }
-                nextTime = nextTime.plusMonths(1).withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
-                checkIfDateTimeBarrierIsReached(nextTime, dateTimeBarrier);
+        while (true) {
+            checkIfDateTimeBarrierIsReached(nextDateTime[0], dateTimeBarrier);
+            if (!monthField.nextMatch(nextDateTime)) {
+                continue;
             }
-            if (dayOfWeekField.matches(nextTime.toLocalDate())) {
-                break;
+            if (!findDay(nextDateTime, dateTimeBarrier)) {
+                continue;
             }
-            nextTime = nextTime.plusDays(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
-            checkIfDateTimeBarrierIsReached(nextTime, dateTimeBarrier);
+            if (!hourField.nextMatch(nextDateTime)) {
+                continue;
+            }
+            if (!minuteField.nextMatch(nextDateTime)) {
+                continue;
+            }
+            if (!secondField.nextMatch(nextDateTime)) {
+                continue;
+            }
+
+            checkIfDateTimeBarrierIsReached(nextDateTime[0], dateTimeBarrier);
+            return nextDateTime[0];
         }
+    }
 
-        return nextTime;
+    /**
+     * Find the next match for the day field.
+     * <p>
+     * This is handled different than all other fields because there are two ways to describe the day and it is easier
+     * to handle them together in the same method.
+     *
+     * @param dateTime        Initial {@link ZonedDateTime} instance to start from
+     * @param dateTimeBarrier At which point stop searching for next execution time
+     * @return {@code true} if a match was found for this field or {@code false} if the field overflowed
+     * @see {@link SimpleField#nextMatch(ZonedDateTime[])}
+     */
+    private boolean findDay(ZonedDateTime[] dateTime, ZonedDateTime dateTimeBarrier) {
+        int month = dateTime[0].getMonthValue();
+
+            while (!(dayOfMonthField.matches(dateTime[0].toLocalDate())
+                    && dayOfWeekField.matches(dateTime[0].toLocalDate()))) {
+                dateTime[0] = dateTime[0].plusDays(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+                if (dateTime[0].getMonthValue() != month) {
+                    return false;
+                }
+            }
+            return true;
     }
 
     private static void checkIfDateTimeBarrierIsReached(ZonedDateTime nextTime, ZonedDateTime dateTimeBarrier) {
@@ -373,6 +495,23 @@ public class CronExpression {
             }
             return false;
         }
+
+        protected int nextMatch(int val, FieldPart part) {
+            if (val > part.to) {
+                return -1;
+            }
+            int nextPotential = Math.max(val, part.from);
+            if (part.increment == 1 || nextPotential == part.from) {
+                return nextPotential;
+            }
+
+            int remainder = ((nextPotential - part.from) % part.increment);
+            if (remainder != 0) {
+                nextPotential += part.increment - remainder;
+            }
+
+            return nextPotential <= part.to ? nextPotential : -1;
+        }
     }
 
     static class SimpleField extends BasicField {
@@ -388,6 +527,30 @@ public class CronExpression {
                     }
                 }
             }
+            return false;
+        }
+
+        /**
+         * Find the next match for this field. If a match cannot be found force an overflow and increase the next
+         * greatest field.
+         *
+         * @param dateTime {@link ZonedDateTime} array so the reference can be modified
+         * @return {@code true} if a match was found for this field or {@code false} if the field overflowed
+         */
+        protected boolean nextMatch(ZonedDateTime[] dateTime) {
+            int value = fieldType.getValue(dateTime[0]);
+
+            for (FieldPart part : parts) {
+                int nextMatch = nextMatch(value, part);
+                if (nextMatch > -1) {
+                    if (nextMatch != value) {
+                        dateTime[0] = fieldType.setValue(dateTime[0], nextMatch);
+                    }
+                    return true;
+                }
+            }
+
+            dateTime[0] = fieldType.overflow(dateTime[0]);
             return false;
         }
     }
