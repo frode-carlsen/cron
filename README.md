@@ -18,6 +18,9 @@ See javadoc
 
 # Change history and credits
  
+## version 1.5:
+ * 2019-08-02: performance improvement when next time is further into the future (java8) by @n3world
+ 
 ## version 1.4:
  * 2017-02-13: added support for java6 (supports android 4) by @adelnizamutdinov
  * 2016-09-11: rewritten to Java 8 DateTime by @zemiak
