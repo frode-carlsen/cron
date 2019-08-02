@@ -20,6 +20,7 @@ package fc.cron;
 import java.time.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
@@ -256,9 +257,14 @@ public class CronExpression {
         return getClass().getSimpleName() + "<" + expr + ">";
     }
 
-    static class FieldPart {
-        private Integer from, to, increment;
+    static class FieldPart implements Comparable<FieldPart> {
+        private int from = -1, to = -1, increment = -1;
         private String modifier, incrementModifier;
+
+        @Override
+        public int compareTo(FieldPart o) {
+            return Integer.compare(from, o.from);
+        }
     }
 
     abstract static class BasicField {
@@ -322,14 +328,15 @@ public class CronExpression {
 
                 if (increment != null) {
                     part.incrementModifier = incrementModifier;
-                    part.increment = Integer.valueOf(increment);
+                    part.increment = Integer.parseInt(increment);
                 }
 
                 validateRange(part);
                 validatePart(part);
                 parts.add(part);
-
             }
+
+            Collections.sort(parts);
         }
 
         protected void validatePart(FieldPart part) {
@@ -341,10 +348,10 @@ public class CronExpression {
         }
 
         private void validateRange(FieldPart part) {
-            if ((part.from != null && part.from < fieldType.from) || (part.to != null && part.to > fieldType.to)) {
+            if ((part.from != -1 && part.from < fieldType.from) || (part.to != -1 && part.to > fieldType.to)) {
                 throw new IllegalArgumentException(String.format("Invalid interval [%s-%s], must be %s<=_<=%s", part.from, part.to, fieldType.from,
                         fieldType.to));
-            } else if (part.from != null && part.to != null && part.from > part.to) {
+            } else if (part.from != -1 && part.to != -1 && part.from > part.to) {
                 throw new IllegalArgumentException(
                         String.format(
                                 "Invalid interval [%s-%s].  Rolling periods are not supported (ex. 5-1, only 1-5) since this won't give a deterministic result. Must be %s<=_<=%s",
@@ -352,12 +359,12 @@ public class CronExpression {
             }
         }
 
-        protected Integer mapValue(String value) {
-            Integer idx;
+        protected int mapValue(String value) {
+            int idx;
             if (fieldType.names != null && (idx = fieldType.names.indexOf(value.toUpperCase(Locale.getDefault()))) >= 0) {
-                return idx + 1;
+                return idx + fieldType.from;
             }
-            return Integer.valueOf(value);
+            return Integer.parseInt(value);
         }
 
         protected boolean matches(int val, FieldPart part) {
@@ -410,9 +417,9 @@ public class CronExpression {
         }
 
         @Override
-        protected Integer mapValue(String value) {
+        protected int mapValue(String value) {
             // Use 1-7 for weedays, but 0 will also represent sunday (linux practice)
-            return "0".equals(value) ? Integer.valueOf(7) : super.mapValue(value);
+            return "0".equals(value) ? 7 : super.mapValue(value);
         }
 
         @Override
@@ -439,7 +446,7 @@ public class CronExpression {
             for (FieldPart part : parts) {
                 if ("L".equals(part.modifier)) {
                     YearMonth ym = YearMonth.of(dato.getYear(), dato.getMonth().getValue());
-                    return dato.getDayOfMonth() == (ym.lengthOfMonth() - (part.from == null ? 0 : part.from));
+                    return dato.getDayOfMonth() == (ym.lengthOfMonth() - (part.from == -1 ? 0 : part.from));
                 } else if ("W".equals(part.modifier)) {
                     if (dato.getDayOfWeek().getValue() <= 5) {
                         if (dato.getDayOfMonth() == part.from) {
