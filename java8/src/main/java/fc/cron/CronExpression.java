@@ -311,6 +311,10 @@ public class CronExpression {
         return nextTimeAfter(afterTime, afterTime.plusYears(4));
     }
 
+    public LocalDateTime neste(LocalDateTime forrige) {
+        return nextTimeAfter(ZonedDateTime.of(forrige, ZoneId.systemDefault())).toLocalDateTime();
+    }
+    
     public ZonedDateTime nextTimeAfter(ZonedDateTime afterTime, long durationInMillis) {
         // will search for the next time within the next durationInMillis
         // millisecond. Be aware that the duration is specified in millis,
