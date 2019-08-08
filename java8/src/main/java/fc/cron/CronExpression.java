@@ -20,6 +20,7 @@ package fc.cron;
 import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -311,8 +312,8 @@ public class CronExpression {
         return nextTimeAfter(afterTime, afterTime.plusYears(4));
     }
 
-    public LocalDateTime neste(LocalDateTime forrige) {
-        return nextTimeAfter(ZonedDateTime.of(forrige, ZoneId.systemDefault())).toLocalDateTime();
+    public LocalDateTime nextLocalDateTimeAfter(LocalDateTime dateTime) {
+        return nextTimeAfter(ZonedDateTime.of(dateTime, ZoneId.systemDefault())).toLocalDateTime();
     }
     
     public ZonedDateTime nextTimeAfter(ZonedDateTime afterTime, long durationInMillis) {
