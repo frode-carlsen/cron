@@ -19,7 +19,6 @@
           <fork>true</fork>
           <source>1.8</source>
           <target>1.8</target>
-          <release>1.8</release>
           <encoding>UTF-8</encoding>
         </configuration>
       </plugin>
