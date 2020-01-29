@@ -823,4 +823,67 @@ public class CronExpressionTest {
         ZonedDateTime expected = ZonedDateTime.of(2016, 2, 29, 0, 0, 0, 0, zoneId);
         assertTrue(CronExpression.createWithoutSeconds("* * 29 2 *").nextTimeAfter(after).equals(expected));
     }
+
+    @Test
+    public void testTriggerProblemSameMonth() {
+        assertEquals(ZonedDateTime.parse("2020-01-02T00:50:00Z"),
+            new CronExpression("00 50 * 1-8 1 *")
+                .nextTimeAfter(ZonedDateTime.parse("2020-01-01T23:50:00Z")));
+    }
+
+    @Test
+    public void testTriggerProblemNextMonth() {
+        assertEquals(ZonedDateTime.parse("2020-02-01T00:50:00Z"),
+            new CronExpression("00 50 * 1-8 2 *")
+                .nextTimeAfter(ZonedDateTime.parse("2020-01-31T23:50:00Z")));
+    }
+
+    @Test
+    public void testTriggerProblemNextYear() {
+        assertEquals(ZonedDateTime.parse("2020-01-01T00:50:00Z"),
+            new CronExpression("00 50 * 1-8 1 *")
+                .nextTimeAfter(ZonedDateTime.parse("2019-12-31T23:50:00Z")));
+    }
+
+    @Test
+    public void testTriggerProblemNextMonthMonthAst() {
+        assertEquals(ZonedDateTime.parse("2020-02-01T00:50:00Z"),
+            new CronExpression("00 50 * 1-8 * *")
+                .nextTimeAfter(ZonedDateTime.parse("2020-01-31T23:50:00Z")));
+    }
+
+    @Test
+    public void testTriggerProblemNextYearMonthAst() {
+        assertEquals(ZonedDateTime.parse("2020-01-01T00:50:00Z"),
+            new CronExpression("00 50 * 1-8 * *")
+                .nextTimeAfter(ZonedDateTime.parse("2019-12-31T23:50:00Z")));
+    }
+
+    @Test
+    public void testTriggerProblemNextMonthDayAst() {
+        assertEquals(ZonedDateTime.parse("2020-02-01T00:50:00Z"),
+            new CronExpression("00 50 * * 2 *")
+                .nextTimeAfter(ZonedDateTime.parse("2020-01-31T23:50:00Z")));
+    }
+
+    @Test
+    public void testTriggerProblemNextYearDayAst() {
+        assertEquals(ZonedDateTime.parse("2020-01-01T00:50:00Z"),
+            new CronExpression("00 50 * * 1 *")
+                .nextTimeAfter(ZonedDateTime.parse("2019-12-31T22:50:00Z")));
+    }
+
+    @Test
+    public void testTriggerProblemNextMonthAllAst() {
+        assertEquals(ZonedDateTime.parse("2020-02-01T00:50:00Z"),
+            new CronExpression("00 50 * * * *")
+                .nextTimeAfter(ZonedDateTime.parse("2020-01-31T23:50:00Z")));
+    }
+
+    @Test
+    public void testTriggerProblemNextYearAllAst() {
+        assertEquals(ZonedDateTime.parse("2020-01-01T00:50:00Z"),
+            new CronExpression("00 50 * * * *")
+                .nextTimeAfter(ZonedDateTime.parse("2019-12-31T23:50:00Z")));
+    }
 }

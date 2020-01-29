@@ -191,12 +191,12 @@ public class CronExpression {
 
             @Override
             ZonedDateTime setValue(ZonedDateTime dateTime, int value) {
-                return dateTime.withDayOfMonth(value).withMinute(0).withSecond(0).withNano(0);
+                return dateTime.withDayOfMonth(value).withHour(0).withMinute(0).withSecond(0).withNano(0);
             }
 
             @Override
             ZonedDateTime overflow(ZonedDateTime dateTime) {
-                return dateTime.plusMonths(1).withDayOfMonth(0).withMinute(0).withSecond(0).withNano(0);
+                return dateTime.plusMonths(1).withDayOfMonth(0).withHour(0).withMinute(0).withSecond(0).withNano(0);
             }
         },
         MONTH(1, 12,
@@ -208,12 +208,12 @@ public class CronExpression {
 
             @Override
             ZonedDateTime setValue(ZonedDateTime dateTime, int value) {
-                return dateTime.withMonth(value).withDayOfMonth(1).withMinute(0).withSecond(0).withNano(0);
+                return dateTime.withMonth(value).withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
             }
 
             @Override
             ZonedDateTime overflow(ZonedDateTime dateTime) {
-                return dateTime.plusYears(1).withMonth(1).withDayOfMonth(1).withMinute(0).withSecond(0).withNano(0);
+                return dateTime.plusYears(1).withMonth(1).withHour(0).withDayOfMonth(1).withMinute(0).withSecond(0).withNano(0);
             }
         },
         DAY_OF_WEEK(1, 7, Arrays.asList("MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN")) {
