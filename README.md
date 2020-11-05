@@ -1,5 +1,10 @@
 
+[![Sonarcloud Status](https://sonarcloud.io/api/project_badges/measure?project=frode-carlsen_cron&metric=alert_status)](https://sonarcloud.io/dashboard?id=frode-carlsen_cron) 
+[![SonarCloud Coverage](https://sonarcloud.io/api/project_badges/measure?project=frode-carlsen_cron&metric=coverage)](https://sonarcloud.io/component_measures/metric/coverage/list?id=frode-carlsen_cron)
+[![SonarCloud Bugs](https://sonarcloud.io/api/project_badges/measure?project=frode-carlsen_cron&metric=bugs)](https://sonarcloud.io/component_measures/metric/reliability_rating/list?id=frode-carlsen_cron)
+[![SonarCloud Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=frode-carlsen_cron&metric=vulnerabilities)](https://sonarcloud.io/component_measures/metric/security_rating/list?id=frode-carlsen_cron)
 [![Known Vulnerabilities](https://snyk.io/test/github/frode-carlsen/cron/badge.svg?targetFile=pom.xml)](https://snyk.io/test/github/frode-carlsen/cron?targetFile=pom.xml)
+![GitHub](https://img.shields.io/github/license/frode-carlsen/cron)
 
 # cron
 
@@ -17,6 +22,9 @@ See javadoc
 
 
 # Change history and credits
+ 
+## version 1.6:
+ * 2020-11-05: fix issue #7 for java8 Switching Month/Year with given Month fails on nextTimeAfter by @foto-andreas
  
 ## version 1.5:
  * 2019-08-02: performance improvement when next time is further into the future (java8) by @n3world
