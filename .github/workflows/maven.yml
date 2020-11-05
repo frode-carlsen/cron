@@ -1,6 +1,11 @@
 name: Java CI
 
-on: [push]
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    types: [opened, synchronize, reopened]
 
 jobs:
   build:
@@ -8,10 +13,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@master
-    - name: Set up JDK 11
-      uses: actions/setup-java@v1
-      with:
-        version: 11
-    - name: Build with Maven
-      run: mvn package --file pom.xml
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+  
+      - name: Build with Maven
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: mvn verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar --file pom.xml -DtrimStackTrace=false -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=fco -Dsonar.projectKey=frode-carlsen_cron
+        

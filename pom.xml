@@ -5,9 +5,17 @@
 	<groupId>fc.cron</groupId>
 	<artifactId>cron</artifactId>
 	<packaging>pom</packaging>
-	<version>1.6-SNAPSHOT</version>
+	<version>${revision}${sha1}${changelist}</version>
 	<name>cron</name>
 	<url>https://github.com/frode-carlsen/cron</url>
+	
+	<properties>
+		<revision>1.6</revision>
+		<sha1 />
+		<changelist>-SNAPSHOT</changelist>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+	</properties>
 	
 	<licenses>
 		<license>
@@ -78,8 +86,4 @@
 		</profile>
 	</profiles>
 	
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-	</properties>
 </project>

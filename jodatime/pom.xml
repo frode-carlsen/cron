@@ -6,7 +6,7 @@
   <parent>
     <groupId>fc.cron</groupId>
     <artifactId>cron</artifactId>
-    <version>1.5</version>
+    <version>${revision}${sha1}${changelist}</version>
   </parent>
 
   <artifactId>cron-jodatime</artifactId>
