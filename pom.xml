@@ -10,9 +10,9 @@
 	<url>https://github.com/frode-carlsen/cron</url>
 	
 	<properties>
-		<revision>1.6</revision>
+		<revision>1.7</revision>
 		<sha1 />
-		<changelist></changelist>
+		<changelist>-SNAPSHOT</changelist>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 	</properties>
