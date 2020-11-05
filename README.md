@@ -21,7 +21,7 @@ See javadoc
 # Change history and credits
  
 ## version 1.6:
- * 2020-11-05: fix issue #7 for java8 Switching Month/Year with given Month fails on nextTimeAfter by @foto-andreas
+ * 2020-11-05: fix issue [#7](/../../issues/7) for java8 Switching Month/Year with given Month fails on nextTimeAfter by @foto-andreas
  
 ## version 1.5:
  * 2019-08-02: performance improvement when next time is further into the future (java8) by @n3world
