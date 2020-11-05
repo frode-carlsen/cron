@@ -1,6 +1,5 @@
 
-[![Sonarcloud Status](https://sonarcloud.io/api/project_badges/measure?project=frode-carlsen_cron&metric=alert_status)](https://sonarcloud.io/dashboard?id=frode-carlsen_cron) 
-[![SonarCloud Coverage](https://sonarcloud.io/api/project_badges/measure?project=frode-carlsen_cron&metric=coverage)](https://sonarcloud.io/component_measures/metric/coverage/list?id=frode-carlsen_cron)
+(https://sonarcloud.io/component_measures/metric/coverage/list?id=frode-carlsen_cron)
 [![SonarCloud Bugs](https://sonarcloud.io/api/project_badges/measure?project=frode-carlsen_cron&metric=bugs)](https://sonarcloud.io/component_measures/metric/reliability_rating/list?id=frode-carlsen_cron)
 [![SonarCloud Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=frode-carlsen_cron&metric=vulnerabilities)](https://sonarcloud.io/component_measures/metric/security_rating/list?id=frode-carlsen_cron)
 [![Known Vulnerabilities](https://snyk.io/test/github/frode-carlsen/cron/badge.svg?targetFile=pom.xml)](https://snyk.io/test/github/frode-carlsen/cron?targetFile=pom.xml)
