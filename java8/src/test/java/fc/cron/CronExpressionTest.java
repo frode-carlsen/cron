@@ -164,6 +164,18 @@ public class CronExpressionTest {
         after = ZonedDateTime.of(2012, 4, 10, 13, 59, 59, 0, zoneId);
         expected = ZonedDateTime.of(2012, 4, 10, 14, 0, 0, 0, zoneId);
         assertEquals(expected, cronExpr.nextTimeAfter(after));
+
+        after = ZonedDateTime.of(2012, 12, 31, 23, 59, 59, 0, zoneId);
+        expected = ZonedDateTime.of(2013, 1, 1, 0, 0, 0, 0, zoneId);
+        assertEquals(expected, cronExpr.nextTimeAfter(after));
+
+        after = ZonedDateTime.of(1976, 2, 28, 23, 59, 59, 0, zoneId);
+        expected = ZonedDateTime.of(1976, 2, 29, 0, 0, 0, 0, zoneId);
+        assertEquals(expected, cronExpr.nextTimeAfter(after));
+
+        after = ZonedDateTime.of(1977, 2, 28, 23, 59, 59, 0, zoneId);
+        expected = ZonedDateTime.of(1977, 3, 1, 0, 0, 0, 0, zoneId);
+        assertEquals(expected, cronExpr.nextTimeAfter(after));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -228,6 +240,52 @@ public class CronExpressionTest {
         after = ZonedDateTime.of(2012, 4, 10, 13, 1, 10, 0, zoneId);
         expected = ZonedDateTime.of(2012, 4, 10, 13, 2, 10, 0, zoneId);
         assertTrue(new CronExpression("10/100 * * * * *").nextTimeAfter(after).equals(expected));
+    }
+
+    @Test
+    public void check_second_increment_interval_cutted() throws Exception {
+        CronExpression cronExpr = new CronExpression("5/26 * * * * *");
+
+        ZonedDateTime after = ZonedDateTime.of(2012, 4, 10, 13, 0, 0, 0, zoneId);
+        ZonedDateTime expected = ZonedDateTime.of(2012, 4, 10, 13, 0, 5, 0, zoneId);
+        assertEquals(expected, cronExpr.nextTimeAfter(after));
+
+        after = expected;
+        expected = ZonedDateTime.of(2012, 4, 10, 13, 0, 31, 0, zoneId);
+        assertEquals(expected, cronExpr.nextTimeAfter(after));
+
+        after = expected;
+        expected = ZonedDateTime.of(2012, 4, 10, 13, 0, 57, 0, zoneId);
+        assertEquals(expected, cronExpr.nextTimeAfter(after));
+
+        after = expected;
+        expected = ZonedDateTime.of(2012, 4, 10, 13, 1, 5, 0, zoneId);
+        assertEquals(expected, cronExpr.nextTimeAfter(after));
+    }
+
+    @Test
+    public void check_second_increment_start_undefined() throws Exception {
+        CronExpression cronExpr = new CronExpression("*/26 * * * * *");
+
+        ZonedDateTime after = ZonedDateTime.of(2012, 4, 10, 13, 0, 1, 0, zoneId);
+        ZonedDateTime expected = ZonedDateTime.of(2012, 4, 10, 13, 0, 26, 0, zoneId);
+        assertEquals(expected, cronExpr.nextTimeAfter(after));
+
+        after = expected;
+        expected = ZonedDateTime.of(2012, 4, 10, 13, 0, 52, 0, zoneId);
+        assertEquals(expected, cronExpr.nextTimeAfter(after));
+
+        after = expected;
+        expected = ZonedDateTime.of(2012, 4, 10, 13, 1, 0, 0, zoneId);
+        assertEquals(expected, cronExpr.nextTimeAfter(after));
+
+        after = expected;
+        expected = ZonedDateTime.of(2012, 4, 10, 13, 1, 26, 0, zoneId);
+        assertEquals(expected, cronExpr.nextTimeAfter(after));
+
+        after = expected;
+        expected = ZonedDateTime.of(2012, 4, 10, 13, 1, 52, 0, zoneId);
+        assertEquals(expected, cronExpr.nextTimeAfter(after));
     }
 
     @Test
