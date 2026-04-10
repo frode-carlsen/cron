@@ -1,5 +1,3 @@
-[![SonarCloud Bugs](https://sonarcloud.io/api/project_badges/measure?project=frode-carlsen_cron&metric=bugs)](https://sonarcloud.io/component_measures/metric/reliability_rating/list?id=frode-carlsen_cron)
-[![SonarCloud Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=frode-carlsen_cron&metric=vulnerabilities)](https://sonarcloud.io/component_measures/metric/security_rating/list?id=frode-carlsen_cron)
 [![Known Vulnerabilities](https://snyk.io/test/github/frode-carlsen/cron/badge.svg?targetFile=pom.xml)](https://snyk.io/test/github/frode-carlsen/cron?targetFile=pom.xml)
 ![GitHub](https://img.shields.io/github/license/frode-carlsen/cron)
 
